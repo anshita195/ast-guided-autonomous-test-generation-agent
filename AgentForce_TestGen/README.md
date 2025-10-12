@@ -1,25 +1,33 @@
 # AgentForce TestGen
 
-🤖 **AI-Powered Test Case Generator for Python and JavaScript**
+An AI-powered test generation platform that automatically creates comprehensive unit test suites for Python and JavaScript code using Google's Gemini AI. The system analyzes source code, generates intelligent test cases, executes them, and provides detailed coverage reports.
 
-AgentForce TestGen is a sophisticated tool that automatically generates comprehensive test cases for your Python and JavaScript functions using Google's Gemini AI. It analyzes your code, generates meaningful test cases, and provides detailed coverage reports.
+## Features
 
-## ✨ Features
+- **Multi-language Support**: Generates tests for Python (pytest) and JavaScript (Jest)
+- **AI-Powered Generation**: Uses Google Gemini 2.0 Flash for intelligent test case creation
+- **AST-based Parsing**: Extracts function metadata using Python's AST module and Acorn for JavaScript
+- **Automated Execution**: Runs generated tests and provides pass/fail results
+- **Coverage Reporting**: Detailed coverage analysis with percentage metrics
+- **RESTful API**: Clean FastAPI backend with comprehensive error handling
+- **Schema Validation**: Robust LLM interaction with retry logic for reliable outputs
 
-- 🐍 **Python Support**: Generates pytest-compatible test cases
-- 🟨 **JavaScript Support**: Generates Jest-compatible test cases
-- 🧠 **AI-Powered**: Uses Google Gemini 2.0 Flash for intelligent test generation
-- 📊 **Coverage Reports**: Detailed test coverage analysis
-- 🚀 **FastAPI Backend**: RESTful API for easy integration
-- 🎯 **Smart Parsing**: AST-based code analysis for accurate function extraction
+## Architecture
 
-## 🚀 Quick Start
+The system operates as a four-stage pipeline:
+
+1. **Parse & Understand**: Extracts functions, arguments, and metadata from source code
+2. **Plan & Reason**: AI analyzes code and generates structured test plans
+3. **Generate**: Creates executable test files (pytest for Python, Jest for JavaScript)
+4. **Execute & Report**: Runs tests and generates coverage reports
+
+## Quick Start
 
 ### Prerequisites
 
 - Python 3.8+
 - Node.js 16+
-- Google Gemini API Key ([Get one here](https://aistudio.google.com/app/apikey))
+- Google Gemini API key ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -29,20 +37,21 @@ AgentForce TestGen is a sophisticated tool that automatically generates comprehe
    cd AgentForce_TestGen
    ```
 
-2. **Install Python dependencies**
+2. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your GEMINI_API_KEY
+   ```
+
+3. **Install Python dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Install JavaScript dependencies**
+4. **Install JavaScript dependencies**
    ```bash
    npm install
-   ```
-
-4. **Set up environment variables**
-   ```bash
-   cp env.example .env
-   # Edit .env and add your GEMINI_API_KEY
+   cd js && npm install
    ```
 
 5. **Start the server**
@@ -52,7 +61,7 @@ AgentForce TestGen is a sophisticated tool that automatically generates comprehe
 
 The API will be available at `http://localhost:8000`
 
-## 📖 Usage
+## Usage
 
 ### API Endpoints
 
@@ -63,7 +72,12 @@ Content-Type: multipart/form-data
 
 Parameters:
 - language: "python" or "javascript"
-- file: Your source code file (.py or .js)
+- file: Source code file (.py or .js)
+```
+
+#### Health Check
+```http
+GET /health
 ```
 
 ### Example Usage
@@ -84,20 +98,27 @@ def calculate_discount(items: list) -> float:
     return 0.0
 ```
 
-**Generated test**:
-```python
-import pytest
-from examples import sample_input
+**API Call**:
+```bash
+curl -X POST "http://localhost:8000/generate" \
+  -F "language=python" \
+  -F "file=@examples/sample_input.py"
+```
 
-def test_sample_input_1():
-    # Test with input: []
-    result = sample_input.calculate_discount([])
-    assert result == pytest.approx(0.0)
-
-def test_sample_input_2():
-    # Test with input: [(50, 1), (60, 1)]
-    result = sample_input.calculate_discount([(50, 1), (60, 1)])
-    assert result == pytest.approx(11.0)
+**Response**:
+```json
+{
+  "language": "python",
+  "message": "Python tests generated and executed successfully",
+  "test_file_path": "tests/tmp_abc123.py",
+  "functions_found": 1,
+  "coverage_report": {
+    "status": "Success",
+    "summary": "13 tests passed.",
+    "coverage_percentage": 5.11,
+    "full_log": "..."
+  }
+}
 ```
 
 #### JavaScript Example
@@ -111,72 +132,65 @@ function calculateFactorial(n) {
 }
 ```
 
-**Generated test**:
-```javascript
-const { calculateFactorial } = require('../examples/sample_input');
-
-describe('calculateFactorial', () => {
-  it('should return 1 for factorial of 0', () => {
-    expect(calculateFactorial(0)).toBe(1);
-  });
-  it('should return 120 for factorial of 5', () => {
-    expect(calculateFactorial(5)).toBe(120);
-  });
-});
-```
-
-### Using the API
-
-#### cURL Example
+**API Call**:
 ```bash
 curl -X POST "http://localhost:8000/generate" \
-  -F "language=python" \
-  -F "file=@examples/sample_input.py"
+  -F "language=javascript" \
+  -F "file=@examples/sample_input.js"
 ```
 
-#### Python Example
-```python
-import requests
-
-url = "http://localhost:8000/generate"
-files = {"file": open("examples/sample_input.py", "rb")}
-data = {"language": "python"}
-
-response = requests.post(url, files=files, data=data)
-result = response.json()
-print(f"Coverage: {result['coverage_report']['coverage_percentage']}%")
+**Response**:
+```json
+{
+  "language": "javascript",
+  "message": "JavaScript tests generated and executed successfully",
+  "test_file_path": "js_tests/tmp_def456.test.js",
+  "functions_found": 1,
+  "coverage_report": {
+    "status": "Success",
+    "summary": "8 tests passed out of 8.",
+    "coverage_percentage": 100.0,
+    "full_log": "..."
+  }
+}
 ```
 
-## 🏗️ Architecture
+## Project Structure
 
 ```
-AgentForce TestGen/
-├── app/                    # FastAPI application
-│   ├── main.py            # Main API endpoints
+AgentForce_TestGen/
+├── app/                    # Core application
+│   ├── main.py            # FastAPI server and endpoints
 │   ├── parser.py          # Python AST parser
 │   ├── js_parser.py       # JavaScript parser wrapper
-│   ├── test_generator.py  # Python test generator
-│   ├── js_test_generator.py # JavaScript test generator
-│   ├── llm.py             # Google Gemini integration
-│   ├── runner.py          # Python test runner
-│   └── js_runner.py       # JavaScript test runner
+│   ├── test_generator.py  # Python test file generator
+│   ├── js_test_generator.py # JavaScript test file generator
+│   ├── llm.py             # Google Gemini AI integration
+│   ├── runner.py          # Python test execution and coverage
+│   └── js_runner.py       # JavaScript test execution and coverage
 ├── examples/              # Sample input files
-├── tests/                 # Generated Python tests
-├── js_tests/              # Generated JavaScript tests
-├── js/                    # Node.js parser script
-└── coverage/              # Coverage reports
+│   ├── sample_input.py    # Python example
+│   └── sample_input.js    # JavaScript example
+├── js/                    # JavaScript dependencies and parser
+│   ├── parser.js          # Node.js AST parser script
+│   ├── package.json       # JS dependencies (acorn)
+│   └── node_modules/      # Acorn installation
+├── tests/                 # Generated Python tests (auto-created)
+├── js_tests/              # Generated JavaScript tests (auto-created)
+├── coverage/              # Coverage reports (auto-generated)
+├── requirements.txt       # Python dependencies
+├── package.json          # Root JS dependencies (jest)
+├── .env.example          # Environment template
+└── README.md             # This file
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `GEMINI_API_KEY` | Google Gemini API key | Yes | - |
-| `FASTAPI_HOST` | API host | No | `0.0.0.0` |
-| `FASTAPI_PORT` | API port | No | `8000` |
-| `FASTAPI_RELOAD` | Auto-reload | No | `true` |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GEMINI_API_KEY` | Google Gemini API key | Yes |
 
 ### API Configuration
 
@@ -184,94 +198,100 @@ The API supports the following languages:
 - `python`: Generates pytest-compatible tests
 - `javascript`: Generates Jest-compatible tests
 
-## 📊 Test Coverage
+## Testing
 
-AgentForce TestGen provides comprehensive coverage reporting:
-
-- **Python**: Uses `pytest-cov` for coverage analysis
-- **JavaScript**: Uses Jest's built-in coverage reporting
-- **Metrics**: Line coverage percentage and detailed reports
-- **Output**: JSON summaries and HTML reports
-
-## 🧪 Testing
-
-Run the existing test suite:
+Run the comprehensive test suite:
 
 ```bash
-# Python tests
-python -m pytest tests/ -v
-
-# JavaScript tests
-npx jest js_tests/ --verbose
+python examples/test_api.py
 ```
 
-## 🛠️ Development
+This will test:
+- API health and connectivity
+- Python test generation and execution
+- JavaScript test generation and execution
+- Error handling and validation
 
-### Project Structure
+## Coverage Reports
 
-- **Parsers**: Extract function information from source code
-- **LLM Integration**: Generate test cases using Google Gemini
-- **Test Generators**: Create executable test files
-- **Runners**: Execute tests and collect coverage
-- **API Layer**: RESTful interface for all functionality
+The system provides detailed coverage analysis:
 
-### Adding New Languages
+- **Python**: Uses `pytest-cov` for line coverage analysis
+- **JavaScript**: Uses Jest's built-in coverage reporting
+- **Output**: JSON summaries with percentage metrics
+- **Format**: Industry-standard coverage.xml (Python) and coverage-summary.json (JavaScript)
 
-1. Create a parser for the new language
-2. Implement a test generator
-3. Add a test runner
-4. Update the API endpoint
-
-## 📝 API Documentation
+## API Documentation
 
 Once the server is running, visit:
 - **Swagger UI**: `http://localhost:8000/docs`
 - **ReDoc**: `http://localhost:8000/redoc`
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
 1. **"GEMINI_API_KEY not found"**
    - Ensure you have a `.env` file with your API key
-   - Verify the API key is valid
+   - Verify the API key is valid and active
 
 2. **"Jest not found"**
    - Run `npm install` to install JavaScript dependencies
+   - Ensure Node.js 16+ is installed
 
 3. **"Import errors"**
-   - Ensure all Python dependencies are installed: `pip install -r requirements.txt`
+   - Install Python dependencies: `pip install -r requirements.txt`
+   - Verify Python 3.8+ is installed
 
 4. **"Tests failing"**
-   - Check that your source files are in the `examples/` directory
-   - Verify the function names match between source and tests
+   - Check that source files are in the `examples/` directory
+   - Verify function names match between source and generated tests
 
 ### Debug Mode
 
-Run with debug logging:
+Run with verbose logging:
 ```bash
 python -m uvicorn app.main:app --reload --log-level debug
 ```
 
-## 🤝 Contributing
+## Technical Details
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+### AI Integration
+- Uses Google Gemini 2.0 Flash for test generation
+- Implements schema validation with retry logic
+- Structured prompts for consistent JSON output
 
-## 📄 License
+### Code Analysis
+- **Python**: Built-in AST module for function extraction
+- **JavaScript**: Acorn parser via Node.js subprocess
+- Extracts function names, parameters, and metadata
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Test Execution
+- **Python**: pytest with coverage.py integration
+- **JavaScript**: Jest with built-in coverage reporting
+- Automated cleanup of temporary test files
 
-## 🙏 Acknowledgments
+## Contributing
+
+Contributions are welcome! Suggested areas for improvement:
+
+1. **Additional Languages**: Support for TypeScript, Java, C++
+2. **Enhanced AI**: Better test case quality and edge case detection
+3. **UI Interface**: Web-based frontend for easier usage
+4. **CI/CD Integration**: GitHub Actions for automated testing
+5. **Performance**: Caching and optimization improvements
+
+## License
+
+This project is licensed under the MIT License.
+
+## Acknowledgments
 
 - Google Gemini AI for intelligent test generation
 - FastAPI for the robust API framework
-- Jest and pytest for test execution
+- pytest and Jest for test execution
 - The open-source community for various dependencies
 
 ---
 
-**Made with ❤️ by AgentForce Team**
+**Built for modern development workflows with AI-powered automation**

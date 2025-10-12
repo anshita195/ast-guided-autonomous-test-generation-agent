@@ -1,20 +1,7 @@
 {
-  "name": "agentforce_testgen",
-  "version": "1.0.0",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "jest": "^30.0.5"
-  },
-  "description": ""
-}
+    "name": "agentforce_testgen",
+    "version": "1.0.0",
+    "dependencies": {
+      "jest": "^30.0.5"
+    }
+  }

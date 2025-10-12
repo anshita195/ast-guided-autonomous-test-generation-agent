@@ -120,7 +120,22 @@ Your response MUST be a single JSON object.
 
 For each function, create a "test_group" that includes the "function_name" and a list of "cases".
 
-**CRITICAL INSTRUCTION**: The `expected_output` key must contain ONLY the raw expected value (e.g., `0.0`, `12.0`, `true`, `false`, or a string like `"some text"`).
+**CRITICAL INSTRUCTIONS**: 
+1. The `input` key must be a STRING representation of the input (e.g., "2", "hello", "[1,2,3]")
+2. The `expected_output` key must contain ONLY the raw expected value (e.g., `4`, `"Hello"`, `true`)
+
+Example format:
+{{
+  "test_groups": [
+    {{
+      "function_name": "add",
+      "cases": [
+        {{"input": "2", "expected_output": 4}},
+        {{"input": "0", "expected_output": 0}}
+      ]
+    }}
+  ]
+}}
 
 Code to analyze:
 {code}

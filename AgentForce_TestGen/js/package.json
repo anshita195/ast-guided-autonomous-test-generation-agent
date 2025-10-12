@@ -1,9 +1,10 @@
 {
-  "name": "js-parser",
+  "name": "agentforce_testgen",
   "version": "1.0.0",
-  "description": "A simple JS parser for TestGen",
+  "description": "AgentForce TestGen JavaScript dependencies",
   "main": "parser.js",
   "dependencies": {
-    "acorn": "^8.11.3"
+    "acorn": "^8.11.3",
+    "jest": "^30.0.5"
   }
 }

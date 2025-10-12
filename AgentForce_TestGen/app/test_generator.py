@@ -17,7 +17,10 @@ class TestGenerator:
     def generate_test_file(self, module_name: str, test_data: Dict) -> str:
         test_content = [
             "import pytest",
-            f"from examples import {module_name}",
+            "import sys",
+            "import os",
+            "sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'examples'))",
+            f"import {module_name}",
             ""
         ]
 

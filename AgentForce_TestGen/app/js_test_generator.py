@@ -4,9 +4,9 @@ import re
 import tempfile
 
 class JSTestGenerator:
-    def __init__(self):
-        # We will now use a temporary directory
-        pass
+    def __init__(self, output_dir: str = "js_tests"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(exist_ok=True)
 
     def _format_js_value(self, value: Any) -> str:
         if isinstance(value, str):
@@ -61,6 +61,6 @@ class JSTestGenerator:
             test_content.append("")
 
         # --- FIX: Ensure the temporary file has the .test.js suffix ---
-        with tempfile.NamedTemporaryFile(mode='w+', suffix='.test.js', delete=False, dir="js_tests", encoding='utf-8') as temp_file:
+        with tempfile.NamedTemporaryFile(mode='w+', suffix='.test.js', delete=False, dir=self.output_dir, encoding='utf-8') as temp_file:
             temp_file.write("\n".join(test_content))
             return temp_file.name

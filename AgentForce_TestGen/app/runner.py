@@ -25,7 +25,8 @@ def run_tests_and_get_coverage(test_file_path: str, module_name: str) -> dict:
             "-m", "pytest",
             test_file_path,
             f"--cov={project_root / 'examples'}",
-            f"--cov-report=xml:{coverage_xml_path}"
+            f"--cov-report=xml:{coverage_xml_path}",
+            "-v"
         ]
 
         # --- FIX: Handle Windows-specific encoding ---
@@ -34,7 +35,8 @@ def run_tests_and_get_coverage(test_file_path: str, module_name: str) -> dict:
             command,
             capture_output=True,
             check=True,  # We'll handle the exception below
-            cwd=project_root
+            cwd=project_root,
+            timeout=30  # Add timeout to prevent hanging
         )
         try:
             output = result.stdout.decode('utf-8')
@@ -55,9 +57,16 @@ def run_tests_and_get_coverage(test_file_path: str, module_name: str) -> dict:
     except subprocess.CalledProcessError as e:
         stdout = (e.stdout or b"").decode('utf-8', errors='ignore')
         stderr = (e.stderr or b"").decode('utf-8', errors='ignore')
+        
+        # Try to get coverage even if tests failed
+        coverage_pct = 0.0
+        if coverage_xml_path.exists():
+            coverage_pct = get_coverage_from_xml(str(coverage_xml_path))
+        
         return {
             "status": "Tests Failed",
             "summary": "Pytest execution failed.",
+            "coverage_percentage": coverage_pct,
             "error": "Pytest process returned a non-zero exit code.",
             "full_log": stdout + stderr
         }
@@ -65,5 +74,6 @@ def run_tests_and_get_coverage(test_file_path: str, module_name: str) -> dict:
         return {
             "status": "Error",
             "summary": "An unexpected error occurred during test execution.",
+            "coverage_percentage": 0.0,
             "error": str(e)
         }
