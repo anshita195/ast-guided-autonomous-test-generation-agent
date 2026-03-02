@@ -1,4 +1,4 @@
-# AgentForce TestGen
+# AST guided autonomous test generation agent
 
 An AI-powered test generation platform that automatically creates comprehensive unit test suites for Python and JavaScript code using Google's Gemini AI. The system analyzes source code, generates intelligent test cases, executes them, and provides detailed coverage reports.
 
@@ -271,16 +271,6 @@ python -m uvicorn app.main:app --reload --log-level debug
 - **JavaScript**: Jest with built-in coverage reporting
 - Automated cleanup of temporary test files
 
-## Contributing
-
-Contributions are welcome! Suggested areas for improvement:
-
-1. **Additional Languages**: Support for TypeScript, Java, C++
-2. **Enhanced AI**: Better test case quality and edge case detection
-3. **UI Interface**: Web-based frontend for easier usage
-4. **CI/CD Integration**: GitHub Actions for automated testing
-5. **Performance**: Caching and optimization improvements
-
 ## License
 
 This project is licensed under the MIT License.
@@ -291,7 +281,3 @@ This project is licensed under the MIT License.
 - FastAPI for the robust API framework
 - pytest and Jest for test execution
 - The open-source community for various dependencies
-
----
-
-**Built for modern development workflows with AI-powered automation**
